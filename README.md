@@ -28,4 +28,4 @@ The build is signed to run locally, which needs no Apple account. macOS may ask 
 - `DockFit/DockFitEngine.swift`: the timer, Dock repair and edge push.
 - `DockFit/WindowEvents.swift`: notices windows moving or reappearing.
 - `DockFit/Spaces.swift`: full-screen check through a private API, looked up at runtime so it can't crash the app. This rules out the App Store, as does resizing other apps' windows.
-- `site/`: the website, a single static page.
+- `site/`: the website, a single static page. It's published at https://traes008.github.io/dockfit/ from the separate public repo `traes008/dockfit`, which holds only that page. This repo stays private: copy `site/index.html` there to update the site.
