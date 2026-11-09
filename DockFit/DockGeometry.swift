@@ -36,6 +36,9 @@ struct Settings {
 }
 
 enum DockGeometry {
+    /// Measured: the Dock's Accessibility frame starts this far before macOS's reserved edge.
+    private static let dockFrameInset: CGFloat = 4
+
     static func isDock(_ dock: CGRect?, on screen: ScreenInfo) -> Bool {
         guard let dock else { return false }
         let center = CGPoint(x: dock.midX, y: dock.midY)
@@ -61,10 +64,14 @@ enum DockGeometry {
         var right = screen.full.maxX
 
         if let dock, isDock(dock, on: screen) {
+            // Fit flush against the Dock: macOS's reserved edge is exactly that line and ignores
+            // magnification, so use it when it's on this screen. If macOS has it stuck elsewhere,
+            // work out the same line from the Dock, whose frame reaches past it.
+            let tolerance = Settings().edgeTolerance
             switch side(ofDock: dock, on: screen) {
-            case .bottom: bottom = min(bottom, dock.minY - 2)
-            case .left: left = max(left, dock.maxX + 2)
-            case .right: right = min(right, dock.minX - 2)
+            case .bottom: bottom = bottom - screen.visible.maxY > tolerance ? screen.visible.maxY : dock.minY + dockFrameInset
+            case .left: left = screen.visible.minX - left > tolerance ? screen.visible.minX : dock.maxX - dockFrameInset
+            case .right: right = right - screen.visible.maxX > tolerance ? screen.visible.maxX : dock.minX + dockFrameInset
             }
         } else if dock == nil {
             bottom = screen.visible.maxY
@@ -85,12 +92,12 @@ enum DockGeometry {
 
         var result = frame
         var changed = false
-        if abs(frame.height - usable.height) > 3 || abs(frame.minY - usable.minY) > 3 {
+        if abs(frame.height - usable.height) > 1 || abs(frame.minY - usable.minY) > 1 {
             result.origin.y = usable.minY
             result.size.height = usable.height
             changed = true
         }
-        if isFullWidth && (abs(frame.width - usable.width) > 3 || abs(frame.minX - usable.minX) > 3) {
+        if isFullWidth && (abs(frame.width - usable.width) > 1 || abs(frame.minX - usable.minX) > 1) {
             result.origin.x = usable.minX
             result.size.width = usable.width
             changed = true

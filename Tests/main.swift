@@ -35,12 +35,16 @@ check("Dock hidden", stale(nil, [dellReserved, macOK]), "nil")
 check("Dock off every screen", stale(CGRect(x: 100, y: 1500, width: 1108, height: 53), [dellReserved, macOK]), "nil")
 
 // Usable areas, using values measured on the real machine
-check("usable: Dell with Dock", DockGeometry.usableFrame(of: dellReserved, dock: dockOnDell),
-      CGRect(x: 0, y: 30, width: 2560, height: 1345))
+check("usable: Dell with Dock is flush with macOS's edge", DockGeometry.usableFrame(of: dellReserved, dock: dockOnDell),
+      CGRect(x: 0, y: 30, width: 2560, height: 1351))
+check("usable: reservation stuck elsewhere, same line from the Dock", DockGeometry.usableFrame(of: macOK, dock: dockOnMac),
+      CGRect(x: 2560, y: 397, width: 1512, height: 890))
+check("usable: magnified Dock doesn't move the edge", DockGeometry.usableFrame(of: dellReserved, dock: CGRect(x: 660, y: 1340, width: 1240, height: 90)),
+      CGRect(x: 0, y: 30, width: 2560, height: 1351))
 check("usable: Dell without Dock", DockGeometry.usableFrame(of: dellOK, dock: dockOnMac),
       CGRect(x: 0, y: 30, width: 2560, height: 1410))
 check("usable: MacBook with Dock", DockGeometry.usableFrame(of: macReserved, dock: dockOnMac),
-      CGRect(x: 2560, y: 397, width: 1512, height: 884))
+      CGRect(x: 2560, y: 397, width: 1512, height: 890))
 check("usable: Dock unreadable falls back to macOS", DockGeometry.usableFrame(of: dellReserved, dock: nil),
       dellReserved.visible)
 
@@ -49,7 +53,9 @@ let usableWithDock = CGRect(x: 0, y: 30, width: 2560, height: 1345)
 
 check("fit: 65pt gap is closed", DockGeometry.fitted(CGRect(x: 0, y: 30, width: 2560, height: 1345), usable: usableNoDock, full: dellFull, settings: settings),
       usableNoDock)
-check("fit: already right is left alone", DockGeometry.fitted(usableNoDock, usable: usableNoDock, full: dellFull, settings: settings), nil)
+check("fit: a 2pt shortfall is closed", DockGeometry.fitted(CGRect(x: 0, y: 30, width: 2560, height: 1408), usable: usableNoDock, full: dellFull, settings: settings),
+      usableNoDock)
+check("fit: already right is left alone",DockGeometry.fitted(usableNoDock, usable: usableNoDock, full: dellFull, settings: settings), nil)
 check("fit: small window is left alone", DockGeometry.fitted(CGRect(x: 100, y: 100, width: 800, height: 600), usable: usableNoDock, full: dellFull, settings: settings), nil)
 check("fit: half-width keeps its width", DockGeometry.fitted(CGRect(x: 0, y: 30, width: 1280, height: 1345), usable: usableNoDock, full: dellFull, settings: settings),
       CGRect(x: 0, y: 30, width: 1280, height: 1410))
