@@ -63,6 +63,10 @@ check("fit: half-width keeps its width", DockGeometry.fitted(CGRect(x: 0, y: 30,
 check("follow: Dock leaves, window grows", DockGeometry.followed(usableWithDock, old: usableWithDock, new: usableNoDock, settings: settings), usableNoDock)
 check("follow: unrelated window stays", DockGeometry.followed(CGRect(x: 100, y: 100, width: 800, height: 600), old: usableWithDock, new: usableNoDock, settings: settings), nil)
 
+check("poll: pointer just moved is checked quickly", DockGeometry.nextPollInterval(sincePointerMoved: 0.4, sinceActivity: 60, settings: settings), 0.25)
+check("poll: Dock just changed is checked quickly", DockGeometry.nextPollInterval(sincePointerMoved: 60, sinceActivity: 1, settings: settings), 0.25)
+check("poll: nothing going on is checked rarely", DockGeometry.nextPollInterval(sincePointerMoved: 60, sinceActivity: 60, settings: settings), 1.0)
+
 check("edge: Dell bottom row", DockGeometry.isAtDockEdge(CGPoint(x: 900, y: 1439), of: dellOK, side: .bottom), true)
 check("edge: just above", DockGeometry.isAtDockEdge(CGPoint(x: 900, y: 1430), of: dellOK, side: .bottom), false)
 check("best screen: window on MacBook", DockGeometry.bestScreen(for: CGRect(x: 2600, y: 400, width: 900, height: 800), in: [dellOK, macOK])?.id, "MAC")

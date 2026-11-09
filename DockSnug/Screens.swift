@@ -17,9 +17,21 @@ enum Screens {
         CGRect(x: rect.minX, y: mainHeight - rect.maxY, width: rect.width, height: rect.height)
     }
 
+    /// Looking up a display's UUID is the slow part, and this runs several times a second.
+    private static var knownUUIDs: [CGDirectDisplayID: String] = [:]
+
+    /// Call when displays are connected, removed or rearranged: macOS may hand an ID to another display.
+    static func forgetDisplays() {
+        knownUUIDs = [:]
+    }
+
     private static func uuid(of screen: NSScreen) -> String? {
-        guard let number = screen.deviceDescription[NSDeviceDescriptionKey("NSScreenNumber")] as? NSNumber,
-              let uuid = CGDisplayCreateUUIDFromDisplayID(number.uint32Value)?.takeRetainedValue() else { return nil }
-        return CFUUIDCreateString(nil, uuid) as String
+        guard let number = screen.deviceDescription[NSDeviceDescriptionKey("NSScreenNumber")] as? NSNumber else { return nil }
+        let displayID = number.uint32Value
+        if let known = knownUUIDs[displayID] { return known }
+        guard let uuid = CGDisplayCreateUUIDFromDisplayID(displayID)?.takeRetainedValue() else { return nil }
+        let string = CFUUIDCreateString(nil, uuid) as String
+        knownUUIDs[displayID] = string
+        return string
     }
 }

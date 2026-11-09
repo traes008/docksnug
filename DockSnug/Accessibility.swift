@@ -25,7 +25,20 @@ extension AXUIElement {
         return AXValueGetValue(value as! AXValue, .cgSize, &size) ? size : nil
     }
 
+    /// Position and size in one round trip to the other app, instead of two.
     var frame: CGRect? {
+        var values: CFArray?
+        let names = [kAXPositionAttribute, kAXSizeAttribute] as CFArray
+        if AXUIElementCopyMultipleAttributeValues(self, names, [], &values) == .success,
+           let pair = values as? [AnyObject], pair.count == 2,
+           CFGetTypeID(pair[0]) == AXValueGetTypeID(), CFGetTypeID(pair[1]) == AXValueGetTypeID() {
+            var point = CGPoint.zero
+            var size = CGSize.zero
+            if AXValueGetValue(pair[0] as! AXValue, .cgPoint, &point), AXValueGetValue(pair[1] as! AXValue, .cgSize, &size) {
+                return CGRect(origin: point, size: size)
+            }
+        }
+        // An app that doesn't answer the combined request is asked the plain way
         guard let position, let size else { return nil }
         return CGRect(origin: position, size: size)
     }

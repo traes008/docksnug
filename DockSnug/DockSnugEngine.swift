@@ -34,6 +34,9 @@ final class DockSnugEngine {
     private var windowEvents: WindowEvents?
 
     private var screenObserver: NSObjectProtocol?
+    private var spaceObserver: NSObjectProtocol?
+    private var pollTimer: Timer?
+    private var lastActivity: TimeInterval = -.infinity
     private var pendingWindows: [AXUIElement] = []
 
     private var lastUsable: [String: CGRect] = [:]
@@ -62,9 +65,17 @@ final class DockSnugEngine {
 
         screenObserver = NotificationCenter.default.addObserver(
             forName: NSApplication.didChangeScreenParametersNotification, object: nil, queue: .main
-        ) { [weak self] _ in self?.screenDebouncer.call() }
+        ) { [weak self] _ in
+            Screens.forgetDisplays()
+            self?.screenDebouncer.call()
+            self?.noteActivity()
+        }
+        // Entering or leaving full screen shows or hides the Dock without the pointer moving
+        spaceObserver = NSWorkspace.shared.notificationCenter.addObserver(
+            forName: NSWorkspace.activeSpaceDidChangeNotification, object: nil, queue: .main
+        ) { [weak self] _ in self?.noteActivity() }
 
-        startPolling()
+        noteActivity()
     }
 
     // MARK: Windows
@@ -114,13 +125,28 @@ final class DockSnugEngine {
     // MARK: Polling
 
     /// Runs on one screen too: the Dock can misbehave there as well.
-    private func startPolling() {
-        let timer = Timer(timeInterval: settings.pollInterval, repeats: true) { [weak self] _ in self?.tick() }
-        timer.tolerance = settings.pollInterval / 4 // lets macOS group wakeups, which saves battery
+    private func scheduleTick(after interval: TimeInterval) {
+        pollTimer?.invalidate()
+        let timer = Timer(timeInterval: interval, repeats: false) { [weak self] _ in self?.tick() }
+        timer.tolerance = interval / 4 // lets macOS group wakeups, which saves battery
         RunLoop.main.add(timer, forMode: .common)
+        pollTimer = timer
+    }
+
+    /// Something happened that can move the Dock: check right away and keep checking quickly for a while.
+    private func noteActivity() {
+        lastActivity = ProcessInfo.processInfo.systemUptime
+        scheduleTick(after: settings.pollInterval)
     }
 
     private func tick() {
+        let now = ProcessInfo.processInfo.systemUptime
+        // Nothing to fit while the display is off
+        guard CGDisplayIsAsleep(CGMainDisplayID()) == 0 else {
+            scheduleTick(after: settings.idlePollInterval)
+            return
+        }
+
         let dock = dockReader.bounds()
         let settled = dock == lastDock
         if !settled {
@@ -128,7 +154,6 @@ final class DockSnugEngine {
             dockDebouncer.call()
         }
 
-        let now = ProcessInfo.processInfo.systemUptime
         let screens = Screens.current()
         let here = DockGeometry.screen(withDock: dock, in: screens)
         if let dock, let here { dockSide = DockGeometry.side(ofDock: dock, on: here) }
@@ -136,6 +161,12 @@ final class DockSnugEngine {
         returnDockIfNeeded(here: here, settled: settled, screens: screens, now: now)
         assistEdgePush(here: here, screens: screens, now: now)
         repairStaleReservation(dock: dock, here: here, screens: screens, now: now)
+
+        if !settled || dockReturn != nil || staleSince != nil || edgeSince != nil { lastActivity = now }
+        let sincePointerMoved = min(CGEventSource.secondsSinceLastEventType(.combinedSessionState, eventType: .mouseMoved),
+                                    CGEventSource.secondsSinceLastEventType(.combinedSessionState, eventType: .leftMouseDragged))
+        scheduleTick(after: DockGeometry.nextPollInterval(sincePointerMoved: sincePointerMoved,
+                                                          sinceActivity: now - lastActivity, settings: settings))
     }
 
     /// A restarted Dock comes back on the main display: once it has settled, push it back to the
@@ -162,10 +193,10 @@ final class DockSnugEngine {
     private func assistEdgePush(here: ScreenInfo?, screens: [ScreenInfo], now: TimeInterval) {
         guard let point = CGEvent(source: nil)?.location,
               dockReturn == nil,
-              NSEvent.pressedMouseButtons == 0,
               let under = DockGeometry.screen(at: point, in: screens),
               here?.id != under.id,
-              DockGeometry.isAtDockEdge(point, of: under, side: dockSide) else {
+              DockGeometry.isAtDockEdge(point, of: under, side: dockSide),
+              NSEvent.pressedMouseButtons == 0 else {
             edgeSince = nil
             return
         }

@@ -19,6 +19,11 @@ struct Settings {
     var edgeTolerance: CGFloat = 8
     /// Seconds between checks of the Dock's position, since macOS sends no event when it jumps.
     var pollInterval: Double = 0.25
+    /// Seconds between checks while nothing is going on. Each check wakes the app, and the wake-up
+    /// costs far more than the check, so this is what keeps the app cheap.
+    var idlePollInterval: Double = 1
+    /// How long after the pointer last moved, or the Dock last changed, the faster checks continue.
+    var activeLinger: Double = 3
     /// A window counts as maximised if its top is within this distance of the top of the usable area...
     var nearTopTolerance: CGFloat = 35
     /// ...and it is at most this much shorter than the usable area.
@@ -141,6 +146,12 @@ enum DockGeometry {
             if reserved && !isFullscreen(screen) { return screen }
         }
         return nil
+    }
+
+    /// How long to wait before the next check. The Dock only jumps between monitors when the
+    /// pointer pushes against an edge, so a still pointer with nothing pending can be checked rarely.
+    static func nextPollInterval(sincePointerMoved: Double, sinceActivity: Double, settings: Settings) -> Double {
+        min(sincePointerMoved, sinceActivity) < settings.activeLinger ? settings.pollInterval : settings.idlePollInterval
     }
 
     /// Is the pointer pressed against the edge of `screen` where the Dock lives?

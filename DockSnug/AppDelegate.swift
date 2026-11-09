@@ -4,7 +4,7 @@ import SwiftUI
 
 /// Runs in the background with no menu bar icon. Opening the app again shows its settings.
 @main
-final class AppDelegate: NSObject, NSApplicationDelegate {
+final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     private let engine = DockSnugEngine()
     private let status = AppStatus()
     private var settingsWindow: NSWindow?
@@ -47,11 +47,17 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             let window = NSWindow(contentRect: .zero, styleMask: [.titled, .closable], backing: .buffered, defer: false)
             window.title = "DockSnug"
             window.isReleasedWhenClosed = false
+            window.delegate = self
             window.contentView = NSHostingView(rootView: SettingsView(status: status))
             window.center()
             settingsWindow = window
         }
         NSApp.activate(ignoringOtherApps: true)
         settingsWindow?.makeKeyAndOrderFront(nil)
+    }
+
+    /// Frees the settings window's memory; it's rebuilt the next time it's opened.
+    func windowWillClose(_ notification: Notification) {
+        DispatchQueue.main.async { [weak self] in self?.settingsWindow = nil }
     }
 }

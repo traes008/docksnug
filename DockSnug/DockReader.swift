@@ -3,28 +3,25 @@ import ApplicationServices
 
 /// Reads the physical position of the Dock, on whichever monitor it is currently shown.
 final class DockReader {
-    private var dock: AXUIElement?
+    /// The Dock's icon list. Kept between reads so each poll is a single request; dropped if the Dock restarts.
+    private var list: AXUIElement?
 
     func bounds() -> CGRect? {
-        if dock == nil {
-            // Cached so the frequent poll doesn't search all running apps; dropped if the Dock restarts
-            guard let app = NSRunningApplication.runningApplications(withBundleIdentifier: "com.apple.dock").first else {
-                return nil
-            }
-            dock = AXUIElementCreateApplication(app.processIdentifier)
-        }
-
-        guard let children: [AXUIElement] = dock?.attribute(kAXChildrenAttribute) else {
-            dock = nil
+        if list == nil { list = findList() }
+        guard let list else { return nil }
+        guard let frame = list.frame else {
+            self.list = nil
             return nil
         }
-        for child in children {
-            let role: String? = child.attribute(kAXRoleAttribute)
-            // Ignore hidden Docks (when auto-hidden, the Dock sits off-screen or has 0 size)
-            if role == kAXListRole, let frame = child.frame, frame.width > 0, frame.height > 0 {
-                return frame
-            }
+        // Ignore hidden Docks (when auto-hidden, the Dock sits off-screen or has 0 size)
+        return frame.width > 0 && frame.height > 0 ? frame : nil
+    }
+
+    private func findList() -> AXUIElement? {
+        guard let app = NSRunningApplication.runningApplications(withBundleIdentifier: "com.apple.dock").first else {
+            return nil
         }
-        return nil
+        let children: [AXUIElement] = AXUIElementCreateApplication(app.processIdentifier).attribute(kAXChildrenAttribute) ?? []
+        return children.first { ($0.attribute(kAXRoleAttribute) as String?) == kAXListRole }
     }
 }
