@@ -4,7 +4,7 @@ A macOS menu bar app that keeps maximised windows fitted around the Dock when it
 
 ## Status
 
-Written and compiling, with the window and Dock logic checked by `scripts/check.sh`. Not yet run live, because it needs an Accessibility grant. Keep the Hammerspoon version running until this one matches it, and never run both at once: they would fight over the same windows.
+Running and tested live on 2026-11-09: windows follow the Dock in both directions and the edge push works on both screens. The window and Dock logic is checked by `scripts/check.sh`. The stuck-reservation repair has not yet fired for real in this version. Never run this and the Hammerspoon version at once: they would fight over the same windows.
 
 ## Building
 
