@@ -20,7 +20,7 @@ Then open `DockSnug.xcodeproj` in Xcode and press Run, or from the terminal:
 DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer xcodebuild -project DockSnug.xcodeproj -target DockSnug -configuration Release build
 ```
 
-The build is signed to run locally, which needs no Apple account. macOS may ask for Accessibility permission again after each rebuild.
+Signed with a free personal Apple Development certificate (set in the project), so macOS keeps the Accessibility permission across rebuilds.
 
 ## Layout
 
