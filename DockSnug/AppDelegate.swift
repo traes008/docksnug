@@ -1,13 +1,13 @@
 import AppKit
 import ApplicationServices
-import ServiceManagement
+import SwiftUI
 
+/// Runs in the background with no menu bar icon. Opening the app again shows its settings.
 @main
 final class AppDelegate: NSObject, NSApplicationDelegate {
     private let engine = DockSnugEngine()
-    private var statusItem: NSStatusItem?
-    private let statusLine = NSMenuItem(title: "", action: nil, keyEquivalent: "")
-    private let loginItem = NSMenuItem(title: "Open at Login", action: #selector(toggleLogin), keyEquivalent: "")
+    private let status = AppStatus()
+    private var settingsWindow: NSWindow?
     private var permissionTimer: Timer?
 
     static func main() {
@@ -19,14 +19,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func applicationDidFinishLaunching(_ notification: Notification) {
-        setUpMenu()
-
         let prompt = [kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String: true] as CFDictionary
         if AXIsProcessTrustedWithOptions(prompt) {
             begin()
             return
         }
-        statusLine.title = "Waiting for Accessibility permission"
+        showSettings()
         permissionTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] timer in
             guard AXIsProcessTrusted() else { return }
             timer.invalidate()
@@ -34,39 +32,26 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
 
+    func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
+        showSettings()
+        return false
+    }
+
     private func begin() {
-        statusLine.title = "DockSnug is running"
+        status.hasPermission = true
         engine.start()
     }
 
-    private func setUpMenu() {
-        let item = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
-        item.button?.image = NSImage(systemSymbolName: "dock.rectangle", accessibilityDescription: "DockSnug")
-
-        let menu = NSMenu()
-        statusLine.isEnabled = false
-        menu.addItem(statusLine)
-        menu.addItem(.separator())
-        loginItem.target = self
-        loginItem.state = SMAppService.mainApp.status == .enabled ? .on : .off
-        menu.addItem(loginItem)
-        menu.addItem(.separator())
-        menu.addItem(NSMenuItem(title: "Quit DockSnug", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"))
-        item.menu = menu
-        statusItem = item
-    }
-
-    @objc private func toggleLogin() {
-        let service = SMAppService.mainApp
-        do {
-            if service.status == .enabled {
-                try service.unregister()
-            } else {
-                try service.register()
-            }
-        } catch {
-            NSLog("DockSnug: could not change Open at Login: \(error)")
+    private func showSettings() {
+        if settingsWindow == nil {
+            let window = NSWindow(contentRect: .zero, styleMask: [.titled, .closable], backing: .buffered, defer: false)
+            window.title = "DockSnug"
+            window.isReleasedWhenClosed = false
+            window.contentView = NSHostingView(rootView: SettingsView(status: status))
+            window.center()
+            settingsWindow = window
         }
-        loginItem.state = service.status == .enabled ? .on : .off
+        NSApp.activate(ignoringOtherApps: true)
+        settingsWindow?.makeKeyAndOrderFront(nil)
     }
 }

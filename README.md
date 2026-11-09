@@ -1,6 +1,6 @@
 # DockSnug
 
-A macOS menu bar app that keeps maximised windows fitted around the Dock when it jumps between monitors. Native Swift port of `~/Developer/DockFit.spoon`.
+A macOS background app that keeps maximised windows fitted around the Dock when it jumps between monitors. Native Swift port of `~/Developer/DockFit.spoon`.
 
 ## Status
 
