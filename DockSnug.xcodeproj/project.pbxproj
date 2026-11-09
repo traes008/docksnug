@@ -7,13 +7,13 @@
 	objects = {
 
 /* Begin PBXFileReference section */
-		D0C4F17A00000000000000A1 /* DockFit.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DockFit.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		D0C4F17A00000000000000A1 /* DockSnug.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DockSnug.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		D0C4F17A00000000000000A2 /* DockFit */ = {
+		D0C4F17A00000000000000A2 /* DockSnug */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = DockFit;
+			path = DockSnug;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -32,7 +32,7 @@
 		D0C4F17A00000000000000A4 = {
 			isa = PBXGroup;
 			children = (
-				D0C4F17A00000000000000A2 /* DockFit */,
+				D0C4F17A00000000000000A2 /* DockSnug */,
 				D0C4F17A00000000000000A5 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -40,7 +40,7 @@
 		D0C4F17A00000000000000A5 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				D0C4F17A00000000000000A1 /* DockFit.app */,
+				D0C4F17A00000000000000A1 /* DockSnug.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -48,9 +48,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		D0C4F17A00000000000000A6 /* DockFit */ = {
+		D0C4F17A00000000000000A6 /* DockSnug */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = D0C4F17A00000000000000AB /* Build configuration list for PBXNativeTarget "DockFit" */;
+			buildConfigurationList = D0C4F17A00000000000000AB /* Build configuration list for PBXNativeTarget "DockSnug" */;
 			buildPhases = (
 				D0C4F17A00000000000000A7 /* Sources */,
 				D0C4F17A00000000000000A3 /* Frameworks */,
@@ -61,11 +61,11 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				D0C4F17A00000000000000A2 /* DockFit */,
+				D0C4F17A00000000000000A2 /* DockSnug */,
 			);
-			name = DockFit;
-			productName = DockFit;
-			productReference = D0C4F17A00000000000000A1 /* DockFit.app */;
+			name = DockSnug;
+			productName = DockSnug;
+			productReference = D0C4F17A00000000000000A1 /* DockSnug.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -78,7 +78,7 @@
 				LastSwiftUpdateCheck = 2600;
 				LastUpgradeCheck = 2600;
 			};
-			buildConfigurationList = D0C4F17A00000000000000AA /* Build configuration list for PBXProject "DockFit" */;
+			buildConfigurationList = D0C4F17A00000000000000AA /* Build configuration list for PBXProject "DockSnug" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -92,7 +92,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				D0C4F17A00000000000000A6 /* DockFit */,
+				D0C4F17A00000000000000A6 /* DockSnug */,
 			);
 		};
 /* End PBXProject section */
@@ -158,7 +158,7 @@
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Support/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = com.thomasraes.DockFit;
+				PRODUCT_BUNDLE_IDENTIFIER = com.thomasraes.DockSnug;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
 			};
@@ -174,7 +174,7 @@
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Support/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = com.thomasraes.DockFit;
+				PRODUCT_BUNDLE_IDENTIFIER = com.thomasraes.DockSnug;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
 			};
@@ -183,7 +183,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		D0C4F17A00000000000000AA /* Build configuration list for PBXProject "DockFit" */ = {
+		D0C4F17A00000000000000AA /* Build configuration list for PBXProject "DockSnug" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				D0C4F17A00000000000000AC /* Debug */,
@@ -192,7 +192,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		D0C4F17A00000000000000AB /* Build configuration list for PBXNativeTarget "DockFit" */ = {
+		D0C4F17A00000000000000AB /* Build configuration list for PBXNativeTarget "DockSnug" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				D0C4F17A00000000000000AE /* Debug */,

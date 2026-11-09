@@ -4,7 +4,7 @@ import ServiceManagement
 
 @main
 final class AppDelegate: NSObject, NSApplicationDelegate {
-    private let engine = DockFitEngine()
+    private let engine = DockSnugEngine()
     private var statusItem: NSStatusItem?
     private let statusLine = NSMenuItem(title: "", action: nil, keyEquivalent: "")
     private let loginItem = NSMenuItem(title: "Open at Login", action: #selector(toggleLogin), keyEquivalent: "")
@@ -35,13 +35,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     private func begin() {
-        statusLine.title = "DockFit is running"
+        statusLine.title = "DockSnug is running"
         engine.start()
     }
 
     private func setUpMenu() {
         let item = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
-        item.button?.image = NSImage(systemSymbolName: "dock.rectangle", accessibilityDescription: "DockFit")
+        item.button?.image = NSImage(systemSymbolName: "dock.rectangle", accessibilityDescription: "DockSnug")
 
         let menu = NSMenu()
         statusLine.isEnabled = false
@@ -51,7 +51,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         loginItem.state = SMAppService.mainApp.status == .enabled ? .on : .off
         menu.addItem(loginItem)
         menu.addItem(.separator())
-        menu.addItem(NSMenuItem(title: "Quit DockFit", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"))
+        menu.addItem(NSMenuItem(title: "Quit DockSnug", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"))
         item.menu = menu
         statusItem = item
     }
@@ -65,7 +65,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 try service.register()
             }
         } catch {
-            NSLog("DockFit: could not change Open at Login: \(error)")
+            NSLog("DockSnug: could not change Open at Login: \(error)")
         }
         loginItem.state = service.status == .enabled ? .on : .off
     }

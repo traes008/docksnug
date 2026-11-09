@@ -20,7 +20,7 @@ final class Debouncer {
     }
 }
 
-final class DockFitEngine {
+final class DockSnugEngine {
     private struct DockReturn {
         let screenID: String
         let deadline: TimeInterval
@@ -212,7 +212,7 @@ final class DockFitEngine {
             staleSince = nil
             lastRepair = now
             if let here { dockReturn = DockReturn(screenID: here.id, deadline: now + 10) }
-            NSLog("DockFit: macOS still reserves Dock space on the wrong monitor; restarting the Dock")
+            NSLog("DockSnug: macOS still reserves Dock space on the wrong monitor; restarting the Dock")
             _ = try? Process.run(URL(fileURLWithPath: "/usr/bin/killall"), arguments: ["Dock"])
         }
     }

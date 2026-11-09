@@ -29,7 +29,7 @@ struct Settings {
     var repairDelay: Double = 1.5
     /// Minimum seconds between Dock restarts, so a restart that doesn't help can't loop.
     var repairCooldown: Double = 60
-    /// Seconds the pointer may press against a monitor's Dock edge before DockFit brings the Dock there.
+    /// Seconds the pointer may press against a monitor's Dock edge before DockSnug brings the Dock there.
     var edgeAssistDelay: Double = 0.75
     /// Minimum seconds between those assists.
     var edgeAssistCooldown: Double = 2

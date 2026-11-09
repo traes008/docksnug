@@ -1,7 +1,7 @@
 import Foundation
 
 /// Tells whether a display is showing a native full-screen Space. macOS has no public API for this,
-/// so the private function is looked up at runtime: if Apple removes it, DockFit just treats
+/// so the private function is looked up at runtime: if Apple removes it, DockSnug just treats
 /// every Space as a normal one instead of crashing.
 enum Spaces {
     private typealias MainConnectionFn = @convention(c) () -> Int32

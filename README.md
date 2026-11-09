@@ -1,4 +1,4 @@
-# DockFit
+# DockSnug
 
 A macOS menu bar app that keeps maximised windows fitted around the Dock when it jumps between monitors. Native Swift port of `~/Developer/DockFit.spoon`.
 
@@ -14,18 +14,18 @@ The first time, accept the Xcode license:
 sudo xcodebuild -license
 ```
 
-Then open `DockFit.xcodeproj` in Xcode and press Run, or from the terminal:
+Then open `DockSnug.xcodeproj` in Xcode and press Run, or from the terminal:
 
 ```sh
-DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer xcodebuild -project DockFit.xcodeproj -target DockFit -configuration Release build
+DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer xcodebuild -project DockSnug.xcodeproj -target DockSnug -configuration Release build
 ```
 
 The build is signed to run locally, which needs no Apple account. macOS may ask for Accessibility permission again after each rebuild.
 
 ## Layout
 
-- `DockFit/DockGeometry.swift`: all the decisions, as pure functions. Start here.
-- `DockFit/DockFitEngine.swift`: the timer, Dock repair and edge push.
-- `DockFit/WindowEvents.swift`: notices windows moving or reappearing.
-- `DockFit/Spaces.swift`: full-screen check through a private API, looked up at runtime so it can't crash the app. This rules out the App Store, as does resizing other apps' windows.
-- `site/`: the website, a single static page. It's published at https://traes008.github.io/dockfit/ from the separate public repo `traes008/dockfit`, which holds only that page. This repo stays private: copy `site/index.html` there to update the site.
+- `DockSnug/DockGeometry.swift`: all the decisions, as pure functions. Start here.
+- `DockSnug/DockSnugEngine.swift`: the timer, Dock repair and edge push.
+- `DockSnug/WindowEvents.swift`: notices windows moving or reappearing.
+- `DockSnug/Spaces.swift`: full-screen check through a private API, looked up at runtime so it can't crash the app. This rules out the App Store, as does resizing other apps' windows.
+- `site/`: the website, a single static page. It's published at https://traes008.github.io/docksnug/ from the separate public repo `traes008/docksnug`, which holds only that page. This repo stays private: copy `site/index.html` there to update the site.

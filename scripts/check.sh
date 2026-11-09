@@ -4,5 +4,5 @@ set -e
 cd "$(dirname "$0")/.."
 out="$(mktemp -d)"
 trap 'rm -rf "$out"' EXIT
-swiftc -swift-version 5 DockFit/DockGeometry.swift Tests/main.swift -o "$out/checks"
+swiftc -swift-version 5 DockSnug/DockGeometry.swift Tests/main.swift -o "$out/checks"
 "$out/checks"
