@@ -33,7 +33,6 @@ final class DockSnugEngine {
     private let pusher = DockPusher()
     private var windowEvents: WindowEvents?
 
-    private var pollTimer: Timer?
     private var screenObserver: NSObjectProtocol?
     private var pendingWindows: [AXUIElement] = []
 
@@ -47,7 +46,7 @@ final class DockSnugEngine {
     private var lastAssist: TimeInterval = -.infinity
 
     private lazy var windowDebouncer = Debouncer(delay: 0.12) { [weak self] in self?.fitPendingWindows() }
-    private lazy var screenDebouncer = Debouncer(delay: 0.20) { [weak self] in self?.screensChanged() }
+    private lazy var screenDebouncer = Debouncer(delay: 0.20) { [weak self] in self?.refitAllWindows() }
     private lazy var dockDebouncer = Debouncer(delay: settings.pollInterval + 0.1) { [weak self] in self?.refitAllWindows() }
 
     func start() {
@@ -65,7 +64,7 @@ final class DockSnugEngine {
             forName: NSApplication.didChangeScreenParametersNotification, object: nil, queue: .main
         ) { [weak self] _ in self?.screenDebouncer.call() }
 
-        updatePolling()
+        startPolling()
     }
 
     // MARK: Windows
@@ -112,28 +111,13 @@ final class DockSnugEngine {
         lastUsable = newUsable
     }
 
-    private func screensChanged() {
-        refitAllWindows()
-        updatePolling()
-    }
-
     // MARK: Polling
 
-    /// The Dock can only jump between monitors when there is more than one, so a lone screen costs nothing.
-    private func updatePolling() {
-        let needsPolling = Screens.current().count > 1
-        if needsPolling && pollTimer == nil {
-            let timer = Timer(timeInterval: settings.pollInterval, repeats: true) { [weak self] _ in self?.tick() }
-            timer.tolerance = settings.pollInterval / 4 // lets macOS group wakeups, which saves battery
-            RunLoop.main.add(timer, forMode: .common)
-            pollTimer = timer
-        } else if !needsPolling {
-            pollTimer?.invalidate()
-            pollTimer = nil
-            staleSince = nil
-            edgeSince = nil
-            dockReturn = nil
-        }
+    /// Runs on one screen too: the Dock can misbehave there as well.
+    private func startPolling() {
+        let timer = Timer(timeInterval: settings.pollInterval, repeats: true) { [weak self] _ in self?.tick() }
+        timer.tolerance = settings.pollInterval / 4 // lets macOS group wakeups, which saves battery
+        RunLoop.main.add(timer, forMode: .common)
     }
 
     private func tick() {
