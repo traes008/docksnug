@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>DockSnug: windows that keep up with your Dock</title>
 <meta name="description" content="On a Mac with more than one monitor, the Dock jumps between screens and leaves your windows hidden under it or stopping short. DockSnug fits them back automatically.">
+<link rel="icon" type="image/png" href="icon.png">
 <style>
 :root {
   --bg: #f6f5f1;
@@ -36,7 +37,11 @@ body {
   font: 18px/1.55 -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
 }
 main { max-width: 760px; margin: 0 auto; padding: 72px 24px 56px; }
-.name { font-weight: 700; letter-spacing: -0.01em; margin: 0 0 56px; }
+.name { font-weight: 700; letter-spacing: -0.01em; margin: 0 0 56px; display: flex; align-items: center; gap: 12px; }
+.name img { width: 44px; height: 44px; }
+a { color: var(--accent); }
+.get { display: inline-block; margin: 24px 0 0; padding: 12px 20px; border-radius: 12px; background: var(--ink); color: var(--bg); font-weight: 600; text-decoration: none; }
+.note { color: var(--soft); font-size: 15px; margin: 12px 0 0; }
 h1 { font-size: clamp(38px, 8vw, 62px); line-height: 1.04; letter-spacing: -0.03em; margin: 0 0 20px; }
 .lead { font-size: 21px; color: var(--soft); margin: 0 0 12px; max-width: 34em; }
 .status { display: inline-block; margin: 20px 0 0; padding: 6px 12px; border: 1px solid var(--line); border-radius: 999px; font-size: 15px; color: var(--soft); }
@@ -74,12 +79,13 @@ footer { margin-top: 72px; padding-top: 20px; border-top: 1px solid var(--line);
 </head>
 <body>
 <main>
-  <p class="name">DockSnug</p>
+  <p class="name"><img src="icon.png" alt="">DockSnug</p>
 
   <h1>Your Dock moved. Your windows didn't.</h1>
   <p class="lead">On a Mac with more than one monitor, the Dock jumps to whichever screen you push the pointer against. Your windows stay the size they were, so they end up hidden under the Dock or stopping short with an empty strip below.</p>
   <p class="lead">DockSnug lets the Dock go where you want it and fits your windows around it.</p>
-  <p class="status">Coming soon for macOS</p>
+  <a class="get" href="https://github.com/traes008/docksnug">Get it on GitHub</a>
+  <p class="note">Free and open source, for macOS 13 or later. There is no ready-made download yet: you build it yourself with Xcode, which takes a few minutes.</p>
 
   <div class="demo" role="img" aria-label="Two monitors. As the Dock moves from one to the other, the window on each screen resizes to fill the free space.">
     <div class="screen big"><div class="win"></div><div class="dock"></div></div>
@@ -99,7 +105,7 @@ footer { margin-top: 72px; padding-top: 20px; border-top: 1px solid var(--line);
   <p>To clear that stuck space, DockSnug restarts the Dock, so you may see it flicker for a second and your pointer jump briefly as the Dock is put back where it was. It needs Accessibility permission to resize your windows.</p>
   <p>Windows in native full screen are left alone, and it runs quietly in the background, with no menu bar icon.</p>
 
-  <footer>DockSnug is an independent app and isn't affiliated with Apple.</footer>
+  <footer>DockSnug is an independent app and isn't affiliated with Apple. <a href="https://github.com/traes008/docksnug">Source code</a>, MIT licence.</footer>
 </main>
 </body>
 </html>
