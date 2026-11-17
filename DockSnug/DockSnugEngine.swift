@@ -177,7 +177,7 @@ final class DockSnugEngine {
             dockReturn = nil
             return
         }
-        if here != nil && settled && now >= back.nextTry {
+        if here != nil && settled && now >= back.nextTry && !MissionControl.isOpen {
             if let target = screens.first(where: { $0.id == back.screenID }) {
                 pusher.push(to: target, side: dockSide)
             }
@@ -205,7 +205,7 @@ final class DockSnugEngine {
             return
         }
         if now - since >= settings.edgeAssistDelay && now - lastAssist >= settings.edgeAssistCooldown &&
-           !Spaces.isFullscreen(displayID: under.id) {
+           !Spaces.isFullscreen(displayID: under.id) && !MissionControl.isOpen {
             lastAssist = now
             pusher.push(to: under, side: dockSide)
         }
@@ -224,6 +224,11 @@ final class DockSnugEngine {
             return
         }
         if now - since >= settings.repairDelay && now - lastRepair >= settings.repairCooldown {
+            // The Dock's space can look misplaced while Mission Control is open; wait until it closes
+            guard !MissionControl.isOpen else {
+                staleSince = nil
+                return
+            }
             staleSince = nil
             lastRepair = now
             if let here { dockReturn = DockReturn(screenID: here.id, deadline: now + 10) }
