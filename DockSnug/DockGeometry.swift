@@ -138,8 +138,12 @@ enum DockGeometry {
     /// Returns the screen that still has Dock space reserved although the Dock is elsewhere.
     static func staleReservation(dock: CGRect?, screens: [ScreenInfo], settings: Settings,
                                  isFullscreen: (ScreenInfo) -> Bool) -> ScreenInfo? {
-        guard let dockScreen = screen(withDock: dock, in: screens) else { return nil } // hidden or between monitors
-        for screen in screens where screen.id != dockScreen.id {
+        let dockScreen = screen(withDock: dock, in: screens)
+        // No Dock in sight is normal while it slides between monitors or restarts. But when a
+        // full-screen app is hiding it, space reserved on a screen that isn't full screen is left over:
+        // the Dock would be showing there if it belonged there.
+        if dockScreen == nil && !screens.contains(where: isFullscreen) { return nil }
+        for screen in screens where screen.id != dockScreen?.id {
             let reserved = screen.full.maxY - screen.visible.maxY > settings.edgeTolerance ||
                            screen.visible.minX - screen.full.minX > settings.edgeTolerance ||
                            screen.full.maxX - screen.visible.maxX > settings.edgeTolerance

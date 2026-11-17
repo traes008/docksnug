@@ -33,6 +33,14 @@ check("healthy: Dock on Dell, Dell reserved", stale(dockOnDell, [dellReserved, m
 check("stale but Dell is full screen", stale(dockOnMac, [dellReserved, macOK], fullscreen: true), "nil")
 check("Dock hidden", stale(nil, [dellReserved, macOK]), "nil")
 check("Dock off every screen", stale(CGRect(x: 100, y: 1500, width: 1108, height: 53), [dellReserved, macOK]), "nil")
+let hiddenDock = CGRect(x: 2762, y: 1346, width: 1108, height: 53)
+func staleWithMacFullscreen(_ dock: CGRect?, _ screens: [ScreenInfo]) -> String {
+    DockGeometry.staleReservation(dock: dock, screens: screens, settings: settings) { $0.id == "MAC" }?.id ?? "nil"
+}
+check("stale: full-screen app hides the Dock, Dell still reserved", staleWithMacFullscreen(hiddenDock, [dellReserved, macOK]), "DELL")
+check("stale: same when the hidden Dock can't be read", staleWithMacFullscreen(nil, [dellReserved, macOK]), "DELL")
+check("healthy: full-screen app hides the Dock, nothing reserved", staleWithMacFullscreen(hiddenDock, [dellOK, macOK]), "nil")
+check("healthy: Dock on Dell while the MacBook is full screen", staleWithMacFullscreen(dockOnDell, [dellReserved, macOK]), "nil")
 
 // Usable areas, using values measured on the real machine
 check("usable: Dell with Dock is flush with macOS's edge", DockGeometry.usableFrame(of: dellReserved, dock: dockOnDell),
