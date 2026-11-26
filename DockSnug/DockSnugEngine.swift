@@ -60,7 +60,8 @@ final class DockSnugEngine {
         // A hung app must not be able to stall the whole app for long
         AXUIElementSetMessagingTimeout(AXUIElementCreateSystemWide(), 0.25)
 
-        lastDock = dockReader.bounds()
+        dockAutoHides = Self.dockAutoHideSetting()
+        lastDock = dockTakingSpace()
         lastUsable = usableAreas(screens: Screens.current(), dock: lastDock)
 
         let events = WindowEvents { [weak self] windows in self?.queue(windows) }
@@ -87,10 +88,20 @@ final class DockSnugEngine {
         noteActivity()
     }
 
+    /// The Dock's frame, or nil when it takes no space from windows. An auto-hiding Dock slides
+    /// in over the windows, so they must not shrink for it.
+    private func dockTakingSpace() -> CGRect? {
+        dockAutoHides ? nil : dockReader.bounds()
+    }
+
     private func readDockPreferences() {
-        CFPreferencesAppSynchronize("com.apple.dock" as CFString)
-        dockAutoHides = CFPreferencesCopyAppValue("autohide" as CFString, "com.apple.dock" as CFString) as? Bool ?? false
+        dockAutoHides = Self.dockAutoHideSetting()
         noteActivity()
+    }
+
+    private static func dockAutoHideSetting() -> Bool {
+        CFPreferencesAppSynchronize("com.apple.dock" as CFString)
+        return CFPreferencesCopyAppValue("autohide" as CFString, "com.apple.dock" as CFString) as? Bool ?? false
     }
 
     // MARK: Windows
@@ -106,7 +117,7 @@ final class DockSnugEngine {
         let windows = pendingWindows
         pendingWindows = []
         let screens = Screens.current()
-        let dock = dockReader.bounds()
+        let dock = dockTakingSpace()
         for window in windows where window.isFittableWindow {
             guard let frame = window.frame, let screen = DockGeometry.bestScreen(for: frame, in: screens) else { continue }
             let usable = DockGeometry.usableFrame(of: screen, dock: dock)
@@ -122,7 +133,7 @@ final class DockSnugEngine {
 
     private func refitAllWindows() {
         let screens = Screens.current()
-        let newUsable = usableAreas(screens: screens, dock: dockReader.bounds())
+        let newUsable = usableAreas(screens: screens, dock: dockTakingSpace())
         for window in WindowList.all() where window.isFittableWindow {
             guard let frame = window.frame,
                   let screen = DockGeometry.bestScreen(for: frame, in: screens),
@@ -162,7 +173,7 @@ final class DockSnugEngine {
             return
         }
 
-        let dock = dockReader.bounds()
+        let dock = dockTakingSpace()
         let settled = dock == lastDock
         if !settled {
             lastDock = dock
