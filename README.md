@@ -24,6 +24,7 @@ Or build it yourself: open `DockSnug.xcodeproj` in Xcode, pick your own team und
 
 - Only used with two displays and the Dock at the bottom.
 - Needs "Displays have separate Spaces" on, which is the default.
+- With the Dock set to hide automatically, it only fits windows and never moves or restarts the Dock.
 - `scripts/check.sh` runs the logic tests. Start reading at `DockSnug/DockGeometry.swift`.
 
 MIT licence.

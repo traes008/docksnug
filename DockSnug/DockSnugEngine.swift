@@ -35,6 +35,10 @@ final class DockSnugEngine {
 
     private var screenObserver: NSObjectProtocol?
     private var spaceObserver: NSObjectProtocol?
+    private var dockPrefsObserver: NSObjectProtocol?
+    /// With "Automatically hide and show the Dock" on, the Dock reserves no space and comes to the
+    /// pointer by itself, so there is nothing to repair and nothing to bring over.
+    private var dockAutoHides = false
     private var pollTimer: Timer?
     private var lastActivity: TimeInterval = -.infinity
     private var pendingWindows: [AXUIElement] = []
@@ -75,6 +79,17 @@ final class DockSnugEngine {
             forName: NSWorkspace.activeSpaceDidChangeNotification, object: nil, queue: .main
         ) { [weak self] _ in self?.noteActivity() }
 
+        dockPrefsObserver = DistributedNotificationCenter.default().addObserver(
+            forName: Notification.Name("com.apple.dock.prefchanged"), object: nil, queue: .main
+        ) { [weak self] _ in self?.readDockPreferences() }
+        readDockPreferences()
+
+        noteActivity()
+    }
+
+    private func readDockPreferences() {
+        CFPreferencesAppSynchronize("com.apple.dock" as CFString)
+        dockAutoHides = CFPreferencesCopyAppValue("autohide" as CFString, "com.apple.dock" as CFString) as? Bool ?? false
         noteActivity()
     }
 
@@ -158,9 +173,15 @@ final class DockSnugEngine {
         let here = DockGeometry.screen(withDock: dock, in: screens)
         if let dock, let here { dockSide = DockGeometry.side(ofDock: dock, on: here) }
 
-        returnDockIfNeeded(here: here, settled: settled, screens: screens, now: now)
-        assistEdgePush(here: here, screens: screens, now: now)
-        repairStaleReservation(dock: dock, here: here, screens: screens, now: now)
+        if dockAutoHides {
+            dockReturn = nil
+            staleSince = nil
+            edgeSince = nil
+        } else {
+            returnDockIfNeeded(here: here, settled: settled, screens: screens, now: now)
+            assistEdgePush(here: here, screens: screens, now: now)
+            repairStaleReservation(dock: dock, here: here, screens: screens, now: now)
+        }
 
         if !settled || dockReturn != nil || staleSince != nil || edgeSince != nil { lastActivity = now }
         let sincePointerMoved = min(CGEventSource.secondsSinceLastEventType(.combinedSessionState, eventType: .mouseMoved),
