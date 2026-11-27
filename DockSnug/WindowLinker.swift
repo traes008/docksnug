@@ -21,6 +21,8 @@ final class WindowLinker {
         let edge: WindowEdge
         let start: CGRect
         var current: CGRect
+        /// The smallest size the window accepted, once it has refused to shrink further.
+        var smallest: CGSize?
     }
 
     /// What is known about one dragged edge while the pointer leads.
@@ -269,20 +271,36 @@ final class WindowLinker {
             var target = LinkedBorder.adjusted(follower.start, edge: follower.edge, by: movement(follower.edge).rounded())
             guard target != follower.current, target.width > 1, target.height > 1 else { continue }
 
+            // Position and size can only be set one after the other. Between the two the far edge is
+            // briefly wrong, so the order is chosen to make it stick out (off screen, for a tiled
+            // window) rather than pull in, which shows as flicker.
+            if let smallest = follower.smallest {
+                // Known not to get smaller than this: keep the far edge in place
+                target.size.width = max(target.width, smallest.width)
+                target.size.height = max(target.height, smallest.height)
+                target.origin.x = follower.start.maxX - target.width
+                target.origin.y = follower.start.maxY - target.height
+                if !LinkedBorder.movesOrigin(follower.edge) { target.origin = follower.start.origin }
+                guard target != follower.current else { continue }
+            }
             if !LinkedBorder.movesOrigin(follower.edge) {
                 follower.window.setSize(target.size)
             } else if target.width >= follower.current.width && target.height >= follower.current.height {
+                follower.window.setSize(target.size)
+                follower.window.setPosition(target.origin)
+            } else {
                 follower.window.setPosition(target.origin)
                 follower.window.setSize(target.size)
-            } else {
-                // Shrinking: a window that refuses to get smaller must keep its far edge in place
-                follower.window.setSize(target.size)
-                if let actual = follower.window.size, actual != target.size {
+                // A window that refuses to get smaller is put back with its far edge in place
+                if let actual = follower.window.size, actual.width > target.width + 0.5 || actual.height > target.height + 0.5 {
+                    current.followers[index].smallest = CGSize(
+                        width: actual.width > target.width + 0.5 ? actual.width : follower.smallest?.width ?? 0,
+                        height: actual.height > target.height + 0.5 ? actual.height : follower.smallest?.height ?? 0)
                     target.origin.x = follower.start.maxX - actual.width
                     target.origin.y = follower.start.maxY - actual.height
                     target.size = actual
+                    follower.window.setPosition(target.origin)
                 }
-                follower.window.setPosition(target.origin)
             }
             current.followers[index].current = target
             frames[Key(window: follower.window)] = target
