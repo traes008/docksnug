@@ -57,7 +57,10 @@ final class WindowLinker {
     /// A drag is over when no resize has come for this long.
     private let dragTimeout: TimeInterval = 0.5
     /// At most this often is the neighbour moved; faster only burns CPU in both apps.
-    private let minInterval: TimeInterval = 1.0 / 90
+    private let minInterval: TimeInterval = 1.0 / 60
+    /// A moved window takes a moment to draw at its new size; the screen is held that long so the
+    /// half-done state doesn't show. Longer hides more but makes the drag less smooth.
+    private let redrawTime: TimeInterval = 0.006
     /// How often the dragged window is asked where it really is while the pointer leads.
     private let lookInterval: TimeInterval = 0.15
     /// The mouse must have gone down this close to the border for the pointer to lead.
@@ -285,7 +288,7 @@ final class WindowLinker {
             } else {
                 // Position and size can only be set one after the other, and in between the far edge
                 // is in the wrong place. Drawing is held back so only the end result shows.
-                ScreenUpdates.together {
+                ScreenUpdates.together(settle: redrawTime) {
                     if target.width >= follower.current.width && target.height >= follower.current.height {
                         follower.window.setPosition(target.origin)
                         follower.window.setSize(target.size)

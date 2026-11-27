@@ -17,11 +17,12 @@ enum ScreenUpdates {
                 unsafeBitCast(disable, to: UpdateFn.self), unsafeBitCast(reenable, to: UpdateFn.self))
     }()
 
-    static func together(_ changes: () -> Void) {
+    /// `settle` is how long the other app gets to draw its new size before the screen shows it.
+    static func together(settle: TimeInterval, _ changes: () -> Void) {
         guard let (connection, disable, reenable) = symbols else { return changes() }
         let id = connection()
         _ = disable(id)
         changes()
-        _ = reenable(id)
+        DispatchQueue.main.asyncAfter(deadline: .now() + settle) { _ = reenable(id) }
     }
 }
