@@ -9,6 +9,7 @@ https://traes008.github.io/docksnug/
 - Windows grow when the Dock leaves their screen and shrink when it arrives.
 - Fixes the gap macOS sometimes leaves after full screen, by restarting the Dock.
 - Brings the Dock over if macOS ignores your push against a screen edge.
+- Drag the border between two side-by-side windows and both resize, like on Windows.
 
 ## Install
 

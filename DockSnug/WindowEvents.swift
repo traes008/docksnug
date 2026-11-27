@@ -12,11 +12,13 @@ final class WindowEvents {
     ]
 
     private let onWindows: ([AXUIElement]) -> Void
+    private let onResize: (AXUIElement) -> Void
     private var observers: [pid_t: AXObserver] = [:]
     private var workspaceTokens: [NSObjectProtocol] = []
 
-    init(onWindows: @escaping ([AXUIElement]) -> Void) {
+    init(onWindows: @escaping ([AXUIElement]) -> Void, onResize: @escaping (AXUIElement) -> Void) {
         self.onWindows = onWindows
+        self.onResize = onResize
     }
 
     func start() {
@@ -69,6 +71,7 @@ final class WindowEvents {
     private static let callback: AXObserverCallback = { _, element, notification, refcon in
         guard let refcon else { return }
         let events = Unmanaged<WindowEvents>.fromOpaque(refcon).takeUnretainedValue()
+        if (notification as String) == kAXWindowResizedNotification { events.onResize(element) }
         // "Shown" is about the whole app, the others about one window
         let isApp = (notification as String) == kAXApplicationShownNotification
         events.onWindows(isApp ? element.windows : [element])

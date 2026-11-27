@@ -31,6 +31,7 @@ final class DockSnugEngine {
     private let settings = Settings()
     private let dockReader = DockReader()
     private let pusher = DockPusher()
+    private let linker = WindowLinker()
     private var windowEvents: WindowEvents?
 
     private var screenObserver: NSObjectProtocol?
@@ -64,9 +65,12 @@ final class DockSnugEngine {
         lastDock = dockTakingSpace()
         lastUsable = usableAreas(screens: Screens.current(), dock: lastDock)
 
-        let events = WindowEvents { [weak self] windows in self?.queue(windows) }
+        let events = WindowEvents(onWindows: { [weak self] windows in self?.queue(windows) },
+                                  onResize: { [weak self] window in self?.linker.resized(window) })
         events.start()
         windowEvents = events
+        // Fits what is already open, and tells the linker where every window is
+        queue(WindowList.all())
 
         screenObserver = NotificationCenter.default.addObserver(
             forName: NSApplication.didChangeScreenParametersNotification, object: nil, queue: .main
@@ -118,12 +122,19 @@ final class DockSnugEngine {
         pendingWindows = []
         let screens = Screens.current()
         let dock = dockTakingSpace()
-        for window in windows where window.isFittableWindow {
-            guard let frame = window.frame, let screen = DockGeometry.bestScreen(for: frame, in: screens) else { continue }
-            let usable = DockGeometry.usableFrame(of: screen, dock: dock)
-            if let fitted = DockGeometry.fitted(frame, usable: usable, full: screen.full, settings: settings) {
-                window.setFrame(fitted)
+        for window in windows {
+            guard window.isFittableWindow, let frame = window.frame else {
+                linker.forget(window)
+                continue
             }
+            var settled = frame
+            if let screen = DockGeometry.bestScreen(for: frame, in: screens),
+               let fitted = DockGeometry.fitted(frame, usable: DockGeometry.usableFrame(of: screen, dock: dock),
+                                                full: screen.full, settings: settings) {
+                window.setFrame(fitted)
+                settled = fitted
+            }
+            linker.remember(window, frame: settled)
         }
     }
 
@@ -141,8 +152,10 @@ final class DockSnugEngine {
             if let old = lastUsable[screen.id],
                let followed = DockGeometry.followed(frame, old: old, new: new, settings: settings) {
                 window.setFrame(followed)
+                linker.remember(window, frame: followed)
             } else if let fitted = DockGeometry.fitted(frame, usable: new, full: screen.full, settings: settings) {
                 window.setFrame(fitted)
+                linker.remember(window, frame: fitted)
             }
         }
         lastUsable = newUsable

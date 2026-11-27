@@ -50,13 +50,13 @@ extension AXUIElement {
         setSize(frame.size)
     }
 
-    private func setSize(_ size: CGSize) {
+    func setSize(_ size: CGSize) {
         var size = size
         guard let value = AXValueCreate(.cgSize, &size) else { return }
         AXUIElementSetAttributeValue(self, kAXSizeAttribute as CFString, value)
     }
 
-    private func setPosition(_ point: CGPoint) {
+    func setPosition(_ point: CGPoint) {
         var point = point
         guard let value = AXValueCreate(.cgPoint, &point) else { return }
         AXUIElementSetAttributeValue(self, kAXPositionAttribute as CFString, value)

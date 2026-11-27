@@ -8,6 +8,7 @@ final class AppStatus: ObservableObject {
 
 struct SettingsView: View {
     @ObservedObject var status: AppStatus
+    @AppStorage(WindowLinker.settingKey) private var linksBorders = true
     @State private var opensAtLogin = SMAppService.mainApp.status == .enabled
 
     var body: some View {
@@ -24,6 +25,7 @@ struct SettingsView: View {
             }
 
             Section {
+                Toggle("Resize side-by-side windows together", isOn: $linksBorders)
                 Toggle("Open at Login", isOn: Binding(get: { opensAtLogin }, set: setOpensAtLogin))
                 Button("Quit DockSnug") { NSApp.terminate(nil) }
             } footer: {
