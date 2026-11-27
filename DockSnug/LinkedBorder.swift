@@ -13,7 +13,12 @@ enum LinkedBorder {
     /// How far inside the neighbour to look when checking that it is really visible at the border.
     static let probeInset: CGFloat = 24
 
-    private static func coordinate(_ edge: WindowEdge, of frame: CGRect) -> CGFloat {
+    /// A point's position along the direction `edge` moves in.
+    static func along(_ edge: WindowEdge, _ point: CGPoint) -> CGFloat {
+        edge == .left || edge == .right ? point.x : point.y
+    }
+
+    static func coordinate(_ edge: WindowEdge, of frame: CGRect) -> CGFloat {
         switch edge {
         case .left: return frame.minX
         case .right: return frame.maxX

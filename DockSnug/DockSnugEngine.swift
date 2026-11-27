@@ -69,6 +69,7 @@ final class DockSnugEngine {
                                   onResize: { [weak self] window in self?.linker.resized(window) })
         events.start()
         windowEvents = events
+        linker.start()
         // Fits what is already open, and tells the linker where every window is
         queue(WindowList.all())
 
